@@ -102,18 +102,54 @@ const ScreenKey = styled(InputKey)<{
       : "black"};
 `;
 
-const wordle = "ttffy";
-const duplicateChars = wordle
+const wordle = "taffy"; // The wordle of the day. This should eventually be fetched through an API!
+
+// Identifying duplicate characters within the wordle word
+const duplicateChars = wordle.split("").filter(
+  (char, i, arr) =>
+    arr.indexOf(char) !== i && // appears earlier
+    arr.lastIndexOf(char) === i // this is its *last* occurrence
+);
+// Matching duplicated characters and their index in the wordle
+const dupIndex = wordle
   .split("")
-  .filter(
-    (char, i, arr) =>
-      arr.indexOf(char) !== i && // appears earlier
-      arr.lastIndexOf(char) === i // this is its *last* occurrence
+  .map((char, index) =>
+    duplicateChars.includes(char) ? { char: char, index: index } : undefined
   )
-  .map((dupChar) => ({
-    character: dupChar,
-    index: wordle.split("").filter((char) => char === dupChar), // !WAYPOINT!
-  }));
+  .filter((entry) => entry !== undefined);
+
+const dupeCharAndIndex = duplicateChars
+  .map((char) => dupIndex.filter((index) => index.char === char))
+  .map((index) =>
+    Object.fromEntries([
+      ["char", index[0].char],
+      ["indices", index.map((entry) => entry.index)],
+    ])
+  );
+
+type DupeEntry = {
+  char: string;
+  indices: number[];
+};
+
+const dupeCharAndIndexTwo = wordle
+  .split("")
+  .reduce<DupeEntry[]>((acc, char, index, arr) => {
+    // Check if char is duplicated in the word
+    if (arr.indexOf(char) !== arr.lastIndexOf(char)) {
+      let entry = acc.find((e) => e.char === char);
+      if (entry) {
+        entry.indices.push(index);
+      } else {
+        acc.push({ char, indices: [index] });
+      }
+    }
+    return acc;
+  }, []);
+
+console.log(dupeCharAndIndex);
+
+console.log(dupeCharAndIndexTwo);
 
 const keyboardKeys = {
   topRow: ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
