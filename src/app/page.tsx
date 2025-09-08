@@ -104,35 +104,13 @@ const ScreenKey = styled(InputKey)<{
 
 const wordle = "taffy"; // The wordle of the day. This should eventually be fetched through an API!
 
-// Identifying duplicate characters within the wordle word
-const duplicateChars = wordle.split("").filter(
-  (char, i, arr) =>
-    arr.indexOf(char) !== i && // appears earlier
-    arr.lastIndexOf(char) === i // this is its *last* occurrence
-);
-// Matching duplicated characters and their index in the wordle
-const dupIndex = wordle
-  .split("")
-  .map((char, index) =>
-    duplicateChars.includes(char) ? { char: char, index: index } : undefined
-  )
-  .filter((entry) => entry !== undefined);
-
-const dupeCharAndIndex = duplicateChars
-  .map((char) => dupIndex.filter((index) => index.char === char))
-  .map((index) =>
-    Object.fromEntries([
-      ["char", index[0].char],
-      ["indices", index.map((entry) => entry.index)],
-    ])
-  );
-
 type DupeEntry = {
   char: string;
   indices: number[];
 };
 
-const dupeCharAndIndexTwo = wordle
+// Identifying duplicate characters and their indices within the wordle word
+const dupeCharAndIndex = wordle
   .split("")
   .reduce<DupeEntry[]>((acc, char, index, arr) => {
     // Check if char is duplicated in the word
@@ -148,8 +126,6 @@ const dupeCharAndIndexTwo = wordle
   }, []);
 
 console.log(dupeCharAndIndex);
-
-console.log(dupeCharAndIndexTwo);
 
 const keyboardKeys = {
   topRow: ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
@@ -221,7 +197,6 @@ export default function Home() {
         words[chosenRow][characterIndex] !== wordle[characterIndex]
       ) {
         // Partial is for characters that are in the Wordle word but don't match the character index
-        console.log(duplicateChars);
         console.log(words[chosenRow][characterIndex]);
         return KeyStates.partial;
       } else {
